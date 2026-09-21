@@ -1,0 +1,66 @@
+services:
+  jaeger:
+    image: cr.jaegertracing.io/jaegertracing/jaeger:2.21.0
+    restart: unless-stopped
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+
+  restaurant-service:
+    build:
+      context: ./services/restaurant-service
+    restart: unless-stopped
+    environment:
+      PORT: "3001"
+      OTEL_SERVICE_NAME: restaurant-service
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://jaeger:4318/v1/traces
+    ports:
+      - "3001:3001"
+    depends_on:
+      - jaeger
+
+  payment-service:
+    build:
+      context: ./services/payment-service
+    restart: unless-stopped
+    environment:
+      PORT: "3002"
+      OTEL_SERVICE_NAME: payment-service
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://jaeger:4318/v1/traces
+    ports:
+      - "3002:3002"
+    depends_on:
+      - jaeger
+
+  delivery-service:
+    build:
+      context: ./services/delivery-service
+    restart: unless-stopped
+    environment:
+      PORT: "3003"
+      OTEL_SERVICE_NAME: delivery-service
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://jaeger:4318/v1/traces
+    ports:
+      - "3003:3003"
+    depends_on:
+      - jaeger
+
+  order-service:
+    build:
+      context: ./services/order-service
+    restart: unless-stopped
+    environment:
+      PORT: "3000"
+      OTEL_SERVICE_NAME: order-service
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://jaeger:4318/v1/traces
+      RESTAURANT_SERVICE_URL: http://restaurant-service:3001
+      PAYMENT_SERVICE_URL: http://payment-service:3002
+      DELIVERY_SERVICE_URL: http://delivery-service:3003
+    ports:
+      - "3000:3000"
+    depends_on:
+      - jaeger
+      - restaurant-service
+      - payment-service
+      - delivery-service

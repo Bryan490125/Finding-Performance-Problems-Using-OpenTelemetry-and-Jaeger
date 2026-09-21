@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+services/*/node_modules/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Editor files
+.vscode/
+.idea/
+
+# Test and coverage output
+coverage/
+
+# Temporary files
+tmp/
